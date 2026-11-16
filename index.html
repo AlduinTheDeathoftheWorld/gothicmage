@@ -419,7 +419,6 @@
 
   <div class="page-wrapper">
     
-    <!-- Заголовок без лишних надписей -->
     <header class="top-crest">
       <h1>Леандро</h1>
       <div class="divider">
@@ -432,7 +431,7 @@
       
       <div class="portrait-container">
         <div class="portrait-frame" id="portrait-dropzone" title="Нажмите, чтобы выбрать картинку Леандро">
-          <img id="portrait-img" src="leandro.png" alt="Леандро - Маг Огня Первого круга" onerror="handleImageError(this)">
+          <img id="portrait-img" src="leandro.png" alt="Леандро - Маг Огня Первого круга">
           <div class="portrait-placeholder" id="portrait-placeholder">
             <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -558,26 +557,38 @@
     const portraitImg = document.getElementById('portrait-img');
     const placeholder = document.getElementById('portrait-placeholder');
 
-    function handleImageError(img) {
-      const savedPortrait = localStorage.getItem('leandro_portrait');
+    const portraitCandidates = ['leandro.png', 'leandro.jpg', 'leandro.jpeg', 'leandro.webp'];
+    let candidateIndex = 0;
+    let triedStorage = false;
+
+    function handlePortraitSuccess() {
+      placeholder.classList.add('hidden');
+    }
+
+    function handlePortraitError() {
+      candidateIndex++;
+      if (candidateIndex < portraitCandidates.length) {
+        portraitImg.src = portraitCandidates[candidateIndex];
+        return;
+      }
+      const savedPortrait = !triedStorage ? localStorage.getItem('leandro_portrait') : null;
       if (savedPortrait) {
-        img.src = savedPortrait;
-        placeholder.classList.add('hidden');
+        triedStorage = true;
+        portraitImg.src = savedPortrait;
       } else {
         placeholder.classList.remove('hidden');
       }
     }
 
-    portraitImg.addEventListener('load', () => {
-      if (portraitImg.src && !portraitImg.src.endsWith('/')) {
-        placeholder.classList.add('hidden');
-      }
-    });
+    portraitImg.addEventListener('load', handlePortraitSuccess);
+    portraitImg.addEventListener('error', handlePortraitError);
 
-    const savedPortrait = localStorage.getItem('leandro_portrait');
-    if (savedPortrait) {
-      portraitImg.src = savedPortrait;
-      placeholder.classList.add('hidden');
+    if (portraitImg.complete) {
+      if (portraitImg.naturalWidth > 0) {
+        handlePortraitSuccess();
+      } else {
+        handlePortraitError();
+      }
     }
 
     dropzone.addEventListener('click', () => fileInput.click());
