@@ -380,23 +380,6 @@
       box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4);
     }
 
-    .bg-controls {
-      text-align: center;
-      margin-top: 28px;
-      font-size: 13px;
-      color: var(--text-muted);
-      opacity: 0.6;
-      transition: opacity 0.2s;
-    }
-    .bg-controls:hover {
-      opacity: 1;
-    }
-    .bg-controls label {
-      cursor: pointer;
-      text-decoration: underline;
-      color: var(--gold-main);
-    }
-
     @media (max-width: 920px) {
       .hero-section {
         grid-template-columns: 1fr;
@@ -543,12 +526,6 @@
       </div>
     </main>
 
-    <div class="bg-controls">
-      Хочешь поставить свою картинку на полупрозрачный фон позади глав? 
-      <label for="bg-input">Выбрать фон глав</label>
-      <input type="file" id="bg-input" accept="image/*" style="display: none;">
-    </div>
-
   </div>
 
   <script>
@@ -627,27 +604,6 @@
       };
       reader.readAsDataURL(file);
     }
-
-    const bgInput = document.getElementById('bg-input');
-    const storyBgArt = document.getElementById('story-bg-art');
-
-    const savedBg = localStorage.getItem('leandro_story_bg');
-    if (savedBg) {
-      storyBgArt.style.backgroundImage = `url('${savedBg}')`;
-    }
-
-    bgInput.addEventListener('change', (e) => {
-      if (e.target.files && e.target.files[0]) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          storyBgArt.style.backgroundImage = `url('${event.target.result}')`;
-          try {
-            localStorage.setItem('leandro_story_bg', event.target.result);
-          } catch (err) {}
-        };
-        reader.readAsDataURL(e.target.files[0]);
-      }
-    });
 
     const canvas = document.getElementById('embers-canvas');
     const ctx = canvas.getContext('2d');
