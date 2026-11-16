@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Леандро - Маг Круга Огня | Квента</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Cinzel:wght@600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-deep: #0b0908;
+      --bg-panel: #14110f;
+      --bg-card: rgba(24, 19, 16, 0.88);
+      --gold-light: #e8c482;
+      --gold-main: #c6934b;
+      --gold-dark: #6e4e23;
+      --crimson: #8c2318;
+      --crimson-glow: rgba(186, 56, 30, 0.28);
+      --text-main: #dcd2c4;
+      --text-muted: #a39583;
+      --border-ornate: rgba(198, 147, 75, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-deep);
+      color: var(--text-main);
+      font-family: 'Lora', Georgia, serif;
+      line-height: 1.8;
+      font-size: 17px;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(140, 35, 24, 0.18) 0%, transparent 60%),
+        radial-gradient(circle at 50% 100%, rgba(198, 147, 75, 0.08) 0%, transparent 50%);
+    }
+
+    #embers-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.55;
+    }
+
+    .page-wrapper {
+      position: relative;
+      z-index: 2;
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* Верхняя шапка */
+    .top-crest {
+      text-align: center;
+      margin-bottom: 36px;
+      position: relative;
+    }
+
+    .top-crest h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(38px, 5vw, 58px);
+      font-weight: 700;
+      color: var(--gold-light);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.9), 0 0 30px rgba(198, 147, 75, 0.25);
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin: 18px auto 0;
+      max-width: 460px;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold-main), transparent);
+    }
+
+    .divider-icon {
+      color: var(--gold-main);
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    /* ТИТУЛЬНИК: Портрет + Внешность и Характер */
+    .hero-section {
+      display: grid;
+      grid-template-columns: 430px 1fr;
+      gap: 40px;
+      align-items: start;
+      margin-bottom: 56px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-ornate);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), inset 0 0 60px rgba(0, 0, 0, 0.6);
+      padding: 36px;
+      position: relative;
+    }
+
+    .hero-section::before,
+    .hero-section::after {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--gold-light);
+      pointer-events: none;
+    }
+    .hero-section::before {
+      top: 8px;
+      left: 8px;
+      border-right: none;
+      border-bottom: none;
+    }
+    .hero-section::after {
+      bottom: 8px;
+      right: 8px;
+      border-left: none;
+      border-top: none;
+    }
+
+    .portrait-container {
+      position: sticky;
+      top: 28px;
+    }
+
+    .portrait-frame {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: radial-gradient(circle, #241914 0%, #0e0b09 100%);
+      border: 2px solid var(--gold-main);
+      box-shadow: 
+        0 12px 35px rgba(0, 0, 0, 0.9),
+        0 0 25px var(--crimson-glow),
+        inset 0 0 25px rgba(0, 0, 0, 0.8);
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .portrait-frame:hover {
+      border-color: var(--gold-light);
+      box-shadow: 
+        0 14px 40px rgba(0, 0, 0, 0.95),
+        0 0 35px rgba(212, 155, 75, 0.35);
+    }
+
+    .portrait-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.6s ease;
+    }
+
+    .portrait-frame:hover img {
+      transform: scale(1.02);
+    }
+
+    .portrait-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      color: var(--gold-light);
+      background: rgba(14, 11, 9, 0.86);
+      backdrop-filter: blur(4px);
+      transition: opacity 0.3s ease;
+    }
+
+    .portrait-placeholder.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .portrait-placeholder svg {
+      width: 48px;
+      height: 48px;
+      stroke: var(--gold-main);
+      margin-bottom: 14px;
+    }
+
+    .portrait-placeholder p {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .portrait-placeholder span {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .portrait-caption {
+      text-align: center;
+      margin-top: 14px;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      color: var(--text-muted);
+      font-size: 16px;
+      letter-spacing: 0.5px;
+    }
+
+    .profile-details {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .trait-block h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--gold-light);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      border-bottom: 1px solid var(--border-ornate);
+      padding-bottom: 8px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .trait-block h2::before {
+      content: "❖";
+      color: var(--crimson);
+      font-size: 18px;
+    }
+
+    .trait-block p {
+      margin-bottom: 14px;
+      text-align: justify;
+      color: var(--text-main);
+    }
+
+    .trait-block p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* СЕКЦИЯ ИСТОРИИ */
+    .story-section {
+      position: relative;
+      background-color: var(--bg-panel);
+      border: 1px solid var(--border-ornate);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
+      padding: 56px 64px;
+      overflow: hidden;
+    }
+
+    .story-bg-art {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1600&q=80');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      opacity: 0.065;
+      filter: sepia(45%) contrast(120%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .story-watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 650px;
+      height: 650px;
+      opacity: 0.035;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .story-vignette {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, transparent 30%, rgba(14, 11, 9, 0.85) 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .story-content {
+      position: relative;
+      z-index: 2;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    .story-main-title {
+      text-align: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 38px;
+      font-weight: 700;
+      color: var(--gold-light);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 42px;
+    }
+
+    .chapter {
+      margin-bottom: 48px;
+      padding-bottom: 36px;
+      border-bottom: 1px solid rgba(198, 147, 75, 0.16);
+    }
+
+    .chapter:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    .chapter h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 27px;
+      font-weight: 700;
+      color: var(--gold-main);
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+    }
+
+    .chapter p {
+      margin-bottom: 16px;
+      text-align: justify;
+    }
+
+    .chapter > p:first-of-type::first-letter {
+      float: left;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3.4em;
+      line-height: 0.82;
+      padding-top: 4px;
+      padding-right: 12px;
+      padding-bottom: 2px;
+      color: var(--gold-light);
+      font-weight: 700;
+      text-shadow: 0 2px 10px rgba(186, 56, 30, 0.5);
+    }
+
+    .dialogue {
+      padding-left: 18px;
+      border-left: 2px solid rgba(198, 147, 75, 0.4);
+      margin: 18px 0;
+      font-style: italic;
+      color: #e8dfd3;
+    }
+
+    .torrez-quote {
+      background: rgba(140, 35, 24, 0.1);
+      border-left: 3px solid var(--gold-main);
+      padding: 20px 24px;
+      margin: 24px 0;
+      font-style: italic;
+      color: #eddcc4;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .bg-controls {
+      text-align: center;
+      margin-top: 28px;
+      font-size: 13px;
+      color: var(--text-muted);
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+    .bg-controls:hover {
+      opacity: 1;
+    }
+    .bg-controls label {
+      cursor: pointer;
+      text-decoration: underline;
+      color: var(--gold-main);
+    }
+
+    @media (max-width: 920px) {
+      .hero-section {
+        grid-template-columns: 1fr;
+        padding: 24px;
+      }
+      .portrait-container {
+        position: static;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+      .story-section {
+        padding: 32px 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="embers-canvas"></canvas>
+
+  <div class="page-wrapper">
+    
+    <!-- Заголовок без лишних надписей -->
+    <header class="top-crest">
+      <h1>Леандро</h1>
+      <div class="divider">
+        <span class="divider-icon">✦</span>
+      </div>
+    </header>
+
+    <!-- ТИТУЛЬНИК -->
+    <section class="hero-section">
+      
+      <div class="portrait-container">
+        <div class="portrait-frame" id="portrait-dropzone" title="Нажмите, чтобы выбрать картинку Леандро">
+          <img id="portrait-img" src="leandro.png" alt="Леандро - Маг Огня Первого круга" onerror="handleImageError(this)">
+          <div class="portrait-placeholder" id="portrait-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            <p>Нажми или перетащи сюда арт Леандро</p>
+            <span>Картинка автоматически сохранится на странице</span>
+          </div>
+          <input type="file" id="portrait-input" accept="image/*" style="display: none;">
+        </div>
+        <div class="portrait-caption">
+          Брат Леандро, Маг Круга Огня (I Круг)
+        </div>
+      </div>
+
+      <div class="profile-details">
+        <div class="trait-block">
+          <h2>Внешность</h2>
+          <p>Леандро двадцать шесть лет, он среднего роста, сухощав и жилист. Тяжелая работа в первые годы каторги согнала с него прежнюю мягкость, но даже под плотной алой мантией мага Первого круга в нем сразу угадывается человек движения и ритма. У него легкий, уверенный шаг бывшего танцора, прямая спина и плавная, естественная жестикуляция.</p>
+          <p>Черты лица у него тонкие и открытые, темная бородка всегда аккуратно подстрижена, а у теплых янтарно-карих глаз залегли мелкие морщинки от привычки часто и искренне улыбаться. На мир он смотрит цепко и с живым любопытством художника, который в каждом отблеске факела, лице или пейзаже невольно ищет красивую форму. Его длинные, чуткие пальцы выдают ремесленника и творца - старые мозоли от кайла и метлы послушника соседствуют на них с въевшимися в кожу пятнами угля, цветной охры и чернил. Голос у Леандро глубокий, хорошо поставленный со времен столичной сцены, способный звучать и мягко, вполголоса, и гулко под каменными сводами во время проповедей.</p>
+        </div>
+
+        <div class="trait-block">
+          <h2>Характер</h2>
+          <p>Если поговорить с Леандро хотя бы пару минут, сразу понимаешь, что перед тобой совсем не тот суровый святоша, в общении это удивительно теплый, жизнерадостный и легкий человек. Когда-то на большой земле его страсть к искусству, шумным пирушкам и сценическому куражу полыхала так яростно, что этот дикий костер попросту сжег его прежнюю жизнь дотла. Но в обители магов его внутренний запал никуда не делся, он просто стал зрелым и спокойным. Сам Леандро любит повторять, что огонь нужен не только для того, чтобы сжигать все вокруг, но и для того, чтобы светить в темноте и греть людей. Он сохранил всю свою любовь к живописи, хорошим книгам и доброй шутке, только теперь его радость тихая и выверенная, без прежней суеты и жажды чужих похвал. В нем нет ни капли высокомерия к простым работягам, ведь он сам когда-то махал киркой в шахте и спал на гнилой соломе, поэтому для любого рудокопа у него всегда найдется доброе слово. При этом за его мягкой улыбкой стоит твердая дисциплина Круга Огня и почти детская, неуемная тяга к познанию - стоит кому-то заикнуться о невиданной твари, редкой траве или странном месте под Барьером, как у Леандро тут же загораются глаза, а руки сами тянутся к углю и бумаге.</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ИСТОРИЯ ПЕРСОНАЖА -->
+    <main class="story-section">
+      <div class="story-bg-art" id="story-bg-art"></div>
+      <div class="story-vignette"></div>
+
+      <svg class="story-watermark" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="100" cy="100" r="90" stroke="#c6934b" stroke-width="2"/>
+        <circle cx="100" cy="100" r="76" stroke="#c6934b" stroke-width="1" stroke-dasharray="4 4"/>
+        <path d="M100 25 C115 60, 145 75, 135 120 C130 145, 110 165, 100 175 C90 165, 70 145, 65 120 C55 75, 85 60, 100 25 Z" stroke="#c6934b" stroke-width="2"/>
+        <path d="M100 55 C108 80, 125 90, 118 125 C114 140, 105 155, 100 160 C95 155, 86 140, 82 125 C75 90, 92 80, 100 55 Z" stroke="#c6934b" stroke-width="1.5"/>
+      </svg>
+
+      <div class="story-content">
+        <h2 class="story-main-title">История</h2>
+
+        <!-- Глава I -->
+        <article class="chapter">
+          <h3>Глава I. Последний поклон</h3>
+          <p>Теплый свет масляных ламп мягко ложится на доски сцены, и я, завершая быстрый танцевальный поворот, выхожу на самый край помоста. Внутри все поет от легкости и куража. Я стою перед полным залом столичного театра в Венгарде и широко, открыто улыбаюсь.</p>
+          <p>Сегодня все идет просто безупречно, буквально как по нотам. За моей спиной возвышаются яркие декорации, которые я сам с таким удовольствием расписывал красками все утро, каждое движение отточено и грациозно. В финале нашей комедии я, поддавшись вдохновению, делаю важный, напыщенный вид, выпячиваю грудь колесом - точь-в-точь как сидящий в ложе королевский судья - и звонко обращаюсь к залу:</p>
+          <div class="dialogue">
+            <p>— О, взгляните на этого благородного господина в бархатном камзоле! Пока солдаты Короля мерзнут на границах, он день и ночь грудью защищает казну... правда, почему-то в собственном сундуке под периной! Но не судите его строго, добрые горожане: тяжелый кошель так тянет к земле, что бедняге даже поклониться вам не с руки!</p>
+          </div>
+          <p>Зал взрывается дружным хохотом и аплодисментами! Я смотрю на сияющие лица зрителей, вижу, как за кулисами довольно улыбаются мои товарищи по труппе, и низко кланяюсь, переполненный гордостью и чистым счастьем. В этот миг мне кажется, что все прошло идеально, что весь мир у моих ног, а впереди ждут десятки таких же ярких вечеров, новых картин и постановок.</p>
+          <p>...Спустя несколько часов я уже был у себя дома, в небольшой съемной комнате на тихой улочке Венгарда. На столике догорала свеча, я только улегся в постель, с улыбкой вспоминая вечернее выступление, как внизу у входной двери раздался глухой удар, а по деревянной лестнице загрохотали тяжелые кованые сапоги.</p>
+          <p>Дверь моей комнаты распахнулась от пинка. В проеме стояли трое городских стражников с факелами и королевский десятник со свитком в руке.</p>
+          <div class="dialogue">
+            <p>— Что за шутки посреди ночи?! — вскочил я с постели, щурясь от резкого света. — Вы перепутали дом, господа!</p>
+            <p>— Леандро, лицедей из столичного театра? — сухо спросил десятник, даже не глядя в бумагу.</p>
+            <p>— Допустим, я. Если вы насчет вечерней комедии, то приходите завтра, представление уже окончено...</p>
+            <p>— Для тебя оно точно окончено, парень, — криво усмехнулся стражник, шагнув вперед и с лязгом защелкивая на моих запястьях железные кандалы. — По личному указу судьи ты взят под стражу за публичное глумление над королевским чином и смуту в военное время.</p>
+            <p>— Да вы в своем уме?! Это же была просто сценка! Обычная театральная шутка! — попытался вырваться я, когда меня рывком потащили к лестнице.</p>
+            <p>— Вот в рудниках и посмеешься, — бросил десятник, спускаясь следом. — Королю нужна руда, а не шуты. В порт его, галиот до Хориниса отходит на рассвете!</p>
+          </div>
+          <p>Уже утром меня в числе других осужденных бросили в сырой трюм корабля, отплывавшего с материка к острову Хоринис - прямиком к магическому Барьеру.</p>
+        </article>
+
+        <!-- Глава II -->
+        <article class="chapter">
+          <h3>Глава II. Чужая земля</h3>
+          <p>Падение с высокого обрыва в ледяную воду озера под гул магического купола разделило его жизнь надвое. Когда двадцатидвухлетний Леандро, отплевываясь от воды и дрожа от пронизывающего холода, выбрался на каменистый берег Долины Рудников, от прежнего беззаботного артиста не осталось и следа.</p>
+          <p>Дни в Колонии потекли для него мучительно и тягуче. Все здесь казалось ему глубоко чуждым и давящим: и вечный тусклый отсвет Барьера над головой, и покосившиеся лачуги Старого Лагеря, и угрюмые взгляды людей вокруг.</p>
+          <p>Труднее всего было сдюжить само общество Колонии. Всю жизнь он вращался среди людей увлеченных, открытых и легких на подъем, а здесь оказался заперт бок о бок с настоящими преступниками - ожесточенными грабителями, убийцами и отчаявшимися каторжниками, которые понимали лишь язык грубой силы.</p>
+          <p>В Старой Шахте его непривычные к кайлу руки быстро покрылись кровавыми мозолями. Чтобы выжить на дне Внешнего кольца, Леандро держался тихо и выручал себя тем немногим, что умел. Будучи человеком грамотным и наделенным талантом к рисованию, он по вечерам углем из костра рисовал портреты для призраков и стражников или писал за неграмотных рудокопов прошения. Но стоило ему вернуться после шахты в свою тесную, темную хижину, как на него наваливалась невыносимая тоска. От полного безделья для ума и отсутствия хотя бы крупицы прекрасного вокруг он чувствовал, как медленно угасает изнутри.</p>
+        </article>
+
+        <!-- Глава III -->
+        <article class="chapter">
+          <h3>Глава III. Книга вместо руды</h3>
+          <p>Единственным светлым пятном в этой серой череде дней стали выходы Магов Круга Огня во Внешнее кольцо. Время от времени мастера выходили из-за стен Замка, чтобы прочесть проповедь для каторжан или набрать отряд добровольцев на черную работу: повести их за пределы лагеря дергать траву для алхимических зелий и носить тяжелые грузы.</p>
+          <p>С самого первого дня своего пребывания в Колонии Леандро не пропустил ни одной такой проповеди и ни одного сбора. Он всегда стоял в первых рядах, внимательно слушая правильную, размеренную речь магов, и без раздумий отзывался на любую черную работу. Для него даже сбор кореньев за лагерем или переноска тяжелых тюков под надзором магов были возможностью хоть ненадолго вырваться из давящей атмосферы рудокопских трущоб.</p>
+          <p>Мастер Торрез, неизменно следивший за этими работами и выдававший награду, со временем обратил внимание на исполнительного юношу, который за все время не допустил ни единого пропуска и трудился на совесть.</p>
+          <p>Однажды, после очередного долгого выхода за травами и переноски тяжелой поклажи, когда остальные рабочие забрали свою руду и разошлись, Леандро решился обратиться к магу. Сидеть в четырех стенах своей хижины после шахты ему стало уже невмоготу от скуки и душевной пустоты. Вместо причитающихся кусков руды он вежливо попросил у Торреза дать ему на время любую книгу для чтения.</p>
+          <p>Припомнив прилежание каторжника, который исправно являлся на каждую проповедь и работу с первого дня под Барьером, Торрез счел эту необычную просьбу вполне уместной. Более того, он решил проверить юношу и дал ему одну из своих любимых художественных книг.</p>
+        </article>
+
+        <!-- Глава IV -->
+        <article class="chapter">
+          <h3>Глава IV. Тени и очаг</h3>
+          <p>Читая эту книгу при тусклом свете свечи в своей лачуге, Леандро испытал непередаваемое чувство. Каждая страница отзывалась в его душе тем самым живым теплом и красотой, которых ему так отчаянно не хватало все это время.</p>
+          <p>Когда он в назначенный срок вернул книгу в целости и сохранности и поблагодарил мастера Торреза, между ними завязалась беседа. Леандро с таким неподдельным воодушевлением принялся обсуждать сюжетные повороты, детали и тонкие мысли автора, что разговор затянулся надолго. Выслушав рассказ юноши о его прежней жизни в театре и о том, как тяжело ему дались дни в Колонии, Торрез натолкнул его на глубокую мысль, которую Леандро раньше не замечал:</p>
+          <div class="torrez-quote">
+            <p>— Ты думаешь, будто твоя жизнь в театре была настоящей, Леандро, но присмотрись к ней трезво, — спокойно произнес мастер Торрез. — Вся твоя сцена была лишь искусной иллюзией. Актер подобен человеку, который в темной комнате показывает людям тени на стене: он надевает чужие личины, говорит заученные речи и живет лишь до тех пор, пока толпа ему рукоплещет. Твой прежний огонь от этих шумных гулянок, страстей и адреналина был слишком диким и неистовым — как сухой хворост, он вспыхнул до небес и в итоге сжег тебя самого, приведя сюда. Но у истинного огня иное предназначение. Когда пламя заключено в надежный очаг, оно не сжигает дом — оно ровно светит и согревает. Оставь погоню за пустыми иллюзиями, направь свой дар на то, что имеет подлинный смысл.</p>
+          </div>
+          <p>В ходе этой долгой беседы мастер Торрез приметил особенное, выделяющееся «я» Леандро - внутри каторжника он увидел редкую жажду к красивому и великому, которую нельзя было оставлять гнить в шахте. Торрез предложил ему стать послушником Круга Огня.</p>
+          <p>Став послушником и погрузившись в изучение трудов в библиотеке Замка, Леандро долго и много размышлял над словами наставника. Постепенно в его сознании сложилось удивительное понимание.</p>
+          <p>Он сумел связать строгую Дисциплину и Порядок со своим внутренним «огнем» эмоций, который в своей чистой сути также присущ Инносу. Леандро понял, что прежние шумные занятия давали ему лишь резкие вспышки адреналина, которые выжигали душу дотла. Догматы же Круга Огня научили его беречь и направлять это пламя. Он не потерял вкус к жизни и не стал угрюмым затворником - напротив, его внутренний огонь стал только сильнее, глубже и устойчивее. Леандро остался все таким же жизнерадостным, отзывчивым и влюбленным в искусство человеком, но теперь его радость приобрела спокойный, выверенный и созидательный вид: его огонь больше не обжигал, а мягко светил и грел.</p>
+        </article>
+
+        <!-- Глава V -->
+        <article class="chapter">
+          <h3>Глава V. Первая руна и кисть</h3>
+          <p>На двенадцатый год существования Барьера Леандро завершил обучение и предстал перед мастерами для посвящения в Маги Огня Первого круга. Именно во время приема в Круг, когда он произносил слова священной Клятвы и впервые напрямую соприкоснулся с рунной магией, до него во всей полноте дошла истинная суть давних слов мастера Торреза. Стоя перед алтарем, Леандро физически ощутил, как по его жилам разливается живое тепло магической силы, а прямо над ним нависает величественное, неоспоримое божественное присутствие самого Инноса. В этот трепетный миг все прежние земные страсти показались ему мелкой пылью перед лицом настоящего чуда. Он окончательно и бесповоротно уверился в правильности своего пути, и с этого дня следование пути созидания стало для него подлинным праздником жизни.</p>
+          <p>Облачившись в алую мантию и заняв свое место среди братьев ордена, он не оставил кисть и перо - напротив, его талант быстро сослужил добрую службу всему Кругу Огня. Отношения между магами и рудными баронами в Замке всегда требовали тонкого подхода. Зная о мастерстве своего нового мага в живописи, верховный мастер Корристо дал Леандро особое разрешение написать несколько парадных портретов для самого Гомеза. Работа была непростой - не каждый выдержит тяжелый взгляд полновластного хозяина Старого Лагеря, - но Леандро справился блестяще. Он сумел перенести на холст всю властность и суровую мощь барона, не скатившись при этом в дешевую лесть. Гомез работу высоко оценил и остался весьма доволен картинами, украсившими залы баронов, а этот жест со стороны Круга Огня помог немного укрепить непростые отношения между магами и верхушкой Замка.</p>
+          <p>Сейчас рабочий стол Леандро в библиотеке всегда завален листами плотного пергамента, баночками с растертыми минеральными красками, углем и начатыми рукописями. Свободное от молитв, алхимии и магических трудов время он с радостью посвящает живописи и пробе пера в написании собственных книг. Но главной его страстью и личной целью стало желание визуально запечатлеть на бумаге и холсте как можно больше диковинок и интересных вещей из самой Колонии. Он с огромным увлечением занимается всевозможными зарисовками: переносит на пергамент редкие травы, внешний вид и строение местных тварей, старые руины и необычные уголки под магическим куполом, искренне веря, что даже в таком суровом месте рука творца способна отыскать и сохранить крупицы великого.</p>
+        </article>
+
+      </div>
+    </main>
+
+    <div class="bg-controls">
+      Хочешь поставить свою картинку на полупрозрачный фон позади глав? 
+      <label for="bg-input">Выбрать фон глав</label>
+      <input type="file" id="bg-input" accept="image/*" style="display: none;">
+    </div>
+
+  </div>
+
+  <script>
+    const dropzone = document.getElementById('portrait-dropzone');
+    const fileInput = document.getElementById('portrait-input');
+    const portraitImg = document.getElementById('portrait-img');
+    const placeholder = document.getElementById('portrait-placeholder');
+
+    function handleImageError(img) {
+      const savedPortrait = localStorage.getItem('leandro_portrait');
+      if (savedPortrait) {
+        img.src = savedPortrait;
+        placeholder.classList.add('hidden');
+      } else {
+        placeholder.classList.remove('hidden');
+      }
+    }
+
+    portraitImg.addEventListener('load', () => {
+      if (portraitImg.src && !portraitImg.src.endsWith('/')) {
+        placeholder.classList.add('hidden');
+      }
+    });
+
+    const savedPortrait = localStorage.getItem('leandro_portrait');
+    if (savedPortrait) {
+      portraitImg.src = savedPortrait;
+      placeholder.classList.add('hidden');
+    }
+
+    dropzone.addEventListener('click', () => fileInput.click());
+
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.style.borderColor = '#e8c482';
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.style.borderColor = '';
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.style.borderColor = '';
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        loadPortraitFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        loadPortraitFile(e.target.files[0]);
+      }
+    });
+
+    function loadPortraitFile(file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        portraitImg.src = event.target.result;
+        placeholder.classList.add('hidden');
+        try {
+          localStorage.setItem('leandro_portrait', event.target.result);
+        } catch (err) {}
+      };
+      reader.readAsDataURL(file);
+    }
+
+    const bgInput = document.getElementById('bg-input');
+    const storyBgArt = document.getElementById('story-bg-art');
+
+    const savedBg = localStorage.getItem('leandro_story_bg');
+    if (savedBg) {
+      storyBgArt.style.backgroundImage = `url('${savedBg}')`;
+    }
+
+    bgInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          storyBgArt.style.backgroundImage = `url('${event.target.result}')`;
+          try {
+            localStorage.setItem('leandro_story_bg', event.target.result);
+          } catch (err) {}
+        };
+        reader.readAsDataURL(e.target.files[0]);
+      }
+    });
+
+    const canvas = document.getElementById('embers-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    for (let i = 0; i < 38; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 2 + 0.6,
+        speedY: Math.random() * 0.45 + 0.15,
+        speedX: (Math.random() - 0.5) * 0.3,
+        alpha: Math.random() * 0.65 + 0.15
+      });
+    }
+
+    function animateEmbers() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let p of particles) {
+        p.y -= p.speedY;
+        p.x += p.speedX;
+        if (p.y < -10) {
+          p.y = canvas.height + 10;
+          p.x = Math.random() * canvas.width;
+        }
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(218, 135, 55, ${p.alpha})`;
+        ctx.fill();
+      }
+      requestAnimationFrame(animateEmbers);
+    }
+    animateEmbers();
+  </script>
+</body>
+</html>
